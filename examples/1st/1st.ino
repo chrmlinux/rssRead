@@ -11,13 +11,17 @@
 
 #include "rssRead.hpp"
 static rssRead rss;
-const char *url  = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
-const char *ssid = "********";
-const char *pswd = "********";
+//const char *url  = "https://news.yahoo.co.jp/rss/topics/top-picks.xml";
+const char *url = "https://www.nhk.or.jp/rss/news/cat0.xml";
+//const char *url = "https://www.asahi.com/rss/asahi/newsheadlines.rdf";
+//const char *url = "https://mainichi.jp/rss/etc/mainichi-flash.rss";
+//const char *url = "https://news.google.com/rss/search?q=Japan&hl=ja&gl=JP&ceid=JP:ja";
 
 //-------------------------------------------------
 // WiFiConnect
 //-------------------------------------------------
+const char *ssid = "********";
+const char *pswd = "********";
 void WiFiConnect(void) {
   WiFi.disconnect(true, true);
   WiFi.begin(ssid, pswd);
@@ -38,7 +42,8 @@ void setup(void) {
   Serial.println("Start rssRead ==>");
   rss.begin();
   rss.axs(url);
-
+//  rss.dumpXml();
+  
   while(1) {
     String dst = rss.finds(String("title"));
     if (!dst.length()) break;

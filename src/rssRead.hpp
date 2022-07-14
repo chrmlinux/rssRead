@@ -5,7 +5,9 @@
 // date/author    : 2022/07/13 @chrmlinux03
 // update/author  : 2022/07/14 @chrmlinux03
 // LICENSE        : MIT
-// Version        : 0.0.1
+// Version        : 0.0.1 Test Version
+//                : 0.0.2 example -> examples
+//                : 0.1.0 memory full fix
 //==========================================================
 
 #ifndef __RSSREAD_HPP__
@@ -16,9 +18,8 @@
 #include <WiFiClientSecure.h>
 static WiFiClientSecure https;
 
-#define __RSSREAD_DEFXMLSIZE__ (1024 * 10)
-#define __RSSREAD_HOSTLENGTH__ (128)
-#define __RSSREAD_SENDLENGTH__ (256)
+#define __RSSREAD_DEFXMLSIZE__ (1024 * 20)
+#define __RSSREAD_DEFPORT__ (443)
 
 //==========================================================
 //
@@ -60,6 +61,20 @@ class rssRead {
     //=================================================
     void end(void) {
       _bufPos = 0;
+      _xml = "";
+    }
+
+    //=================================================
+    //
+    // bufPos
+    //
+    //=================================================
+    uint32_t bufPos(void) {
+      return bufPos(_bufPos);
+    }
+    uint32_t bufPos(uint32_t bufPos) {
+      _bufPos = bufPos;
+      return _bufPos;
     }
 
     //=================================================
@@ -86,11 +101,10 @@ class rssRead {
       //-------------------------------------------------
       // url2host
       //-------------------------------------------------
-      char host[__RSSREAD_HOSTLENGTH__] = {0};
-      strcpy(host, url2host(String(url)).c_str());
+      String host = url2host(String(url));
 
       https.setInsecure();
-      if (!https.connect(host, 443)) {
+      if (!https.connect(host.c_str(), _port)) {
         //-------------------------------------------------
         // connect failed
         //-------------------------------------------------
@@ -102,14 +116,14 @@ class rssRead {
         char *buf;
         buf = new char[_bufSize]; // alloc
         memset(buf, 0x0, _bufSize);
-        char snd[__RSSREAD_SENDLENGTH__] = {0};
 
         //-------------------------------------------------
         // server  connection
         //-------------------------------------------------
-        sprintf(snd, "GET %s HTTP/1.0", url); https.println(snd);
-        sprintf(snd, "Host: %s", host); https.println(snd);
-        https.println("Connection: close");
+        https.println("GET " + String(url) + " HTTP/1.0");
+        https.println("Host: " + host);
+//        https.println("Connection: close");
+        https.println("Connection: Keep-Alive");
         https.println();
 
         //-------------------------------------------------
@@ -127,10 +141,17 @@ class rssRead {
         while (https.available()) {
           buf[_bufPos] = https.read();
           _bufPos ++;
+          if (_bufPos > (_bufSize - 1)) break;
         }
         https.stop();
         _xml = String(buf);
         free(buf); // free
+        _xml.replace("&lt;", "<");
+        _xml.replace("&gt;", ">");
+        _xml.replace("&#39;", "'");
+//        _xml.replace("&quot;", """);
+        _xml.replace("&amp;", "&");
+        _xml.replace("&nbsp;", " ");
       }
       return rtn;
     }
@@ -155,6 +176,17 @@ class rssRead {
         _tagCnt ++;
       }
       return dst;
+    }
+
+    //=================================================
+    //
+    // dumpXml
+    //
+    //=================================================
+    void dumpXml(void) {
+      Serial.println("=== dumpXml Start ===>>");
+      Serial.write(_xml.c_str(), _bufPos);
+      Serial.println("\n<<=== dumpXml End ===");
     }
 
   private:
@@ -186,6 +218,7 @@ class rssRead {
     //=================================================
     String _xml = "";
     uint32_t _bufSize = __RSSREAD_DEFXMLSIZE__;
+    uint16_t _port = __RSSREAD_DEFPORT__;
     uint32_t _bufPos = 0;
     uint16_t _tagCnt = 0;
 };
