@@ -7,3 +7,4 @@ Test version released
 example -> examples
 # 0.1.0
 memory full fix
+![arduino.JPG](https://github.com/chrmlinux/rssRead/blob/main/doc/0.1.0.JPG)
