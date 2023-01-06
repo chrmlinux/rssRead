@@ -3,11 +3,12 @@
 // rssRead
 // Read rss (xml) and return an array of strings.
 // date/author    : 2022/07/13 @chrmlinux03
-// update/author  : 2022/07/14 @chrmlinux03
+// update/author  : 2023/01/05 @kylefmohr
 // LICENSE        : MIT
 // Version        : 0.0.1 Test Version
 //                : 0.0.2 example -> examples
 //                : 0.1.0 memory full fix
+//                : 0.1.1 rename variables and add comments for clarity
 //==========================================================
 
 #ifndef __RSSREAD_HPP__
@@ -45,6 +46,8 @@ class rssRead {
     //=================================================
     //
     // begin
+    // Use this in setup().
+    // OPTIONAL PARAMETER: bufSize, int, default: 1024 * 20 (20KB)
     //
     //=================================================
     void begin(void) {
@@ -57,6 +60,7 @@ class rssRead {
     //=================================================
     //
     // end
+    // Can be used when you want to free memory.
     //
     //=================================================
     void end(void) {
@@ -79,24 +83,30 @@ class rssRead {
 
     //=================================================
     //
-    // tagCnt
+    // tagIndex
+    // Return value: the index of the tag that will be returned by the next finds() call.
+    //
+    // OPTIONAL PARAMETER: tagIndex, int, default: 0
+    // Set the index of the tag that will be returned by the next finds() call.
     //
     //=================================================
-    uint16_t tagCnt(void) {
-      return tagCnt(_tagCnt);
+    uint16_t tagIndex(void) {
+      return tagIndex(_tagIndex);
     }
-    uint16_t tagCnt(uint16_t tagCnt) {
-      _tagCnt = tagCnt;
-      return _tagCnt;
+    uint16_t tagIndex(uint16_t tagIndex) {
+      _tagIndex = tagIndex;
+      return _tagIndex;
     }
 
     //=================================================
     //
-    // axs
+    // open
+    // Pass the URL of the RSS feed to be read.
+    // Return value: 0: OK, -1: Connection failed
     //
     //=================================================
-    int16_t axs(const char *url) {
-      int16_t rtn = 0;
+    int16_t open(const char *url) {
+      int16_t returnCode = 0;
 
       //-------------------------------------------------
       // url2host
@@ -108,7 +118,7 @@ class rssRead {
         //-------------------------------------------------
         // connect failed
         //-------------------------------------------------
-        rtn = -1;
+        returnCode = -1;
       } else {
         //-------------------------------------------------
         // connect OK
@@ -153,34 +163,38 @@ class rssRead {
         _xml.replace("&amp;", "&");
         _xml.replace("&nbsp;", " ");
       }
-      return rtn;
+      return returnCode;
     }
 
     //=================================================
     //
     // finds
+    // Required parameter: tag, String
+    // Pass the tag of the value that you'd like to get
+    // Returns a String of the first value found, then the next value on subsequent calls
     //
     //=================================================
     String finds(String tag) {
-      static int32_t pos = 0;
-      int32_t st, en;
+      static int32_t position = 0;
+      int32_t start, end;
       static int32_t sst = -1;
-      String dst = "";
+      String value = "";
 
-      st = _xml.indexOf(tag, pos) + tag.length();
-      en = _xml.indexOf(tag, st);
-      if (sst < st) {
-        sst = st;
-        dst = _xml.substring(st + 1, en - 2);
-        pos = en + tag.length();
-        _tagCnt ++;
+      start = _xml.indexOf(tag, position) + tag.length();
+      end = _xml.indexOf(tag, start);
+      if (sst < start) {
+        sst = start;
+        value = _xml.substring(start + 1, end - 2);
+        position = end + tag.length();
+        _tagIndex ++;
       }
-      return dst;
+      return value;
     }
 
     //=================================================
     //
     // dumpXml
+    // Dump the XML data for debugging
     //
     //=================================================
     void dumpXml(void) {
@@ -203,24 +217,24 @@ class rssRead {
     //=================================================
     String url2host(String src) {
       String tgt = "https://";
-      String dst = "";
-      int st, en;
-      st = src.indexOf(tgt) + tgt.length();
-      en = src.indexOf("/", st);
-      dst = src.substring(st, en);
-      return dst;
+      String value = "";
+      int start, end;
+      start = src.indexOf(tgt) + tgt.length();
+      end = src.indexOf("/", start);
+      value = src.substring(start, end);
+      return value;
     }
 
     //=================================================
     //
-    // work
+    // default values
     //
     //=================================================
     String _xml = "";
     uint32_t _bufSize = __RSSREAD_DEFXMLSIZE__;
     uint16_t _port = __RSSREAD_DEFPORT__;
     uint32_t _bufPos = 0;
-    uint16_t _tagCnt = 0;
+    uint16_t _tagIndex = 0;
 };
 
 #endif
