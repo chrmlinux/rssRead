@@ -92,12 +92,24 @@ class rssRead {
 
     //=================================================
     //
+    // findPos
+    //
+    //=================================================
+    int32_t findPos(void) {
+      return _pos;
+    }
+    int32_t findPos(int32_t pos) {
+      _pos = pos;
+      return _pos;
+    }
+    //=================================================
+    //
     // axs
     //
     //=================================================
     int16_t axs(const char *url) {
       int16_t rtn = 0;
-
+      _pos=0;
       //-------------------------------------------------
       // url2host
       //-------------------------------------------------
@@ -162,17 +174,16 @@ class rssRead {
     //
     //=================================================
     String finds(String tag) {
-      static int32_t pos = 0;
       int32_t st, en;
       static int32_t sst = -1;
       String dst = "";
 
-      st = _xml.indexOf(tag, pos) + tag.length();
+      st = _xml.indexOf(tag, _pos) + tag.length();
       en = _xml.indexOf(tag, st);
       if (sst < st) {
         sst = st;
         dst = _xml.substring(st + 1, en - 2);
-        pos = en + tag.length();
+        _pos = en + tag.length();
         _tagCnt ++;
       }
       return dst;
@@ -221,6 +232,7 @@ class rssRead {
     uint16_t _port = __RSSREAD_DEFPORT__;
     uint32_t _bufPos = 0;
     uint16_t _tagCnt = 0;
+    int32_t _pos = 0;
 };
 
 #endif
