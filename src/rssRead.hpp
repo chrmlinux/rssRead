@@ -3,11 +3,12 @@
 // rssRead
 // Read rss (xml) and return an array of strings.
 // date/author    : 2022/07/13 @chrmlinux03
-// update/author  : 2022/07/14 @chrmlinux03
+// update/author  : 2023/11/25 @Gianfilippo980
 // LICENSE        : MIT
 // Version        : 0.0.1 Test Version
 //                : 0.0.2 example -> examples
 //                : 0.1.0 memory full fix
+//                : 0.2.0 indexes not zeroing fix
 //==========================================================
 
 #ifndef __RSSREAD_HPP__
