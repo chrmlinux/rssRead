@@ -3,11 +3,12 @@
 // rssRead
 // Read rss (xml) and return an array of strings.
 // date/author    : 2022/07/13 @chrmlinux03
-// update/author  : 2022/07/14 @chrmlinux03
+// update/author  : 2023/11/25 @Gianfilippo980
 // LICENSE        : MIT
 // Version        : 0.0.1 Test Version
 //                : 0.0.2 example -> examples
 //                : 0.1.0 memory full fix
+//                : 0.2.0 indexes not zeroing fix
 //==========================================================
 
 #ifndef __RSSREAD_HPP__
@@ -92,12 +93,37 @@ class rssRead {
 
     //=================================================
     //
+    // findPos
+    //
+    //=================================================
+    int32_t findPos(void) {
+      return _pos;
+    }
+    int32_t findPos(int32_t pos) {
+      _pos = pos;
+      return _pos;
+    }
+     //=================================================
+    //
+    // start
+    //
+    //=================================================
+    int32_t start(void) {
+      return _sst;
+    }
+    int32_t start(int32_t sst) {
+      _sst = sst;
+      return _sst;
+    }
+    //=================================================
+    //
     // axs
     //
     //=================================================
     int16_t axs(const char *url) {
       int16_t rtn = 0;
-
+      _pos = 0;
+      _sst = -1;
       //-------------------------------------------------
       // url2host
       //-------------------------------------------------
@@ -162,17 +188,16 @@ class rssRead {
     //
     //=================================================
     String finds(String tag) {
-      static int32_t pos = 0;
       int32_t st, en;
-      static int32_t sst = -1;
+      
       String dst = "";
 
-      st = _xml.indexOf(tag, pos) + tag.length();
+      st = _xml.indexOf(tag, _pos) + tag.length();
       en = _xml.indexOf(tag, st);
-      if (sst < st) {
-        sst = st;
+      if (_sst < st) {
+        _sst = st;
         dst = _xml.substring(st + 1, en - 2);
-        pos = en + tag.length();
+        _pos = en + tag.length();
         _tagCnt ++;
       }
       return dst;
@@ -221,6 +246,8 @@ class rssRead {
     uint16_t _port = __RSSREAD_DEFPORT__;
     uint32_t _bufPos = 0;
     uint16_t _tagCnt = 0;
+    int32_t _pos = 0;
+    int32_t _sst = -1;
 };
 
 #endif
